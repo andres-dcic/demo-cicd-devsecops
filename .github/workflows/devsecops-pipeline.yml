@@ -30,7 +30,9 @@ jobs:
             -Dsonar.host.url=https://sonarcloud.io \
             -Dsonar.login=${{ secrets.sonar }}
       
-      
+      - name: Install Snyk
+        run: npm install -g snyk
+
       - name: Auth with Snyk
         run: snyk auth ${{ secrets.snyk }}
 
