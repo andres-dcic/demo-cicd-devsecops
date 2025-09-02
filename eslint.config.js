@@ -11,7 +11,7 @@ export default [
     },
   },
   {
-    files: ["test/**/*.js", "**/*.test.js"],
+    files: ["test/**/*.js", "**/*.test.js", "test.js"], 
     languageOptions: {
       globals: {
         describe: true,
