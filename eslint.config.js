@@ -11,7 +11,10 @@ export default [
     },
      languageOptions: {
       globals: {
-        console: true // Solo console global para todo el proyecto
+        console: true, // Solo console global para todo el proyecto
+        require: true,
+        module: true
+
       }
     }
   },
