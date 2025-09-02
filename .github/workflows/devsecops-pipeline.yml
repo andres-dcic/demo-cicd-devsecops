@@ -29,10 +29,15 @@ jobs:
             -Dsonar.sources=. \
             -Dsonar.host.url=https://sonarcloud.io \
             -Dsonar.login=${{ secrets.sonar }}
-      - name: Scan snyk
-        uses: snyk/actions/node@master
-        env:
-          SNYK_TOKEN: ${{ secrets.snyk }}
-        with:
-          args: test
+      
+      
+      - name: Auth with Snyk
+        run: snyk auth ${{ secrets.snyk }}
+
+      - name: Snyk Open Source Scan (dependencies)
+        run: snyk test --file=package.json --severity-threshold=high
+
+      - name: Snyk Monitor (upload results to dashboard)
+        run: snyk monitor --file=package.json  
+
       
