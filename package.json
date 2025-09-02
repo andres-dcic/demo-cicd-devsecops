@@ -1,6 +1,5 @@
 {
   "name": "my-todolist",
-  "type": "module",
   "version": "0.1.0",
   "dependencies": {
     "body-parser": "^1.20.3",
