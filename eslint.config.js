@@ -9,6 +9,11 @@ export default [
     rules: {
       // Puedes agregar reglas personalizadas aquí
     },
+     languageOptions: {
+      globals: {
+        console: true // Solo console global para todo el proyecto
+      }
+    }
   },
   {
     files: ["test/**/*.js", "**/*.test.js", "test.js"], 
