@@ -1,52 +1,89 @@
+name: DevSecOps CI/CD Pipeline
 on:
   push:
     branches:
-      - main
-      - 'feature/**'
-  pull_request:
-    branches:
-      - main
+      - develop
+
 jobs:
-  sonarcloud-analysis:
+  
+  SAST:
+    runs-on: ubuntu-latest
+    name: Static Application Security Testing
+    steps:   
+    
+      - name: Git Clone
+        uses: actions/checkout@v4
+      
+        
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: javascript
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: javascript
+
+      
+  SCA:
+    needs: SAST
+    name: Software Composition Analysis
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
+      - name: Git Clone
         uses: actions/checkout@v4
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-      - name: Install dependencies
-        run: npm install
-      - name: Install ESLint and security plugin
-        run: npm install --save-dev eslint eslint-plugin-security
-     # 1️⃣ Linting con ESLint
-      - name: Run ESLint
-       # run: npm run lint || echo "⚠️ ESLint found issues, but pipeline continues"
-        run: npm run lint 
-      - name: Run SonarCloud Scan
-        env:
-          SONAR_TOKEN: ${{ secrets.sonar }}
+        
+      - name: Build
         run: |
-          npm install -g sonar-scanner
-          sonar-scanner \
-            -Dsonar.projectKey=andres-dcic_demo-cicd-devsecops \
-            -Dsonar.organization=andres-dcic \
-            -Dsonar.sources=. \
-            -Dsonar.host.url=https://sonarcloud.io \
-            -Dsonar.login=${{ secrets.sonar }}
+          echo "Build the project"
+
+      - name: Dependency Check
+        run: |
+          echo "Run dependency check"
+                    
+  Docker-build:
+    name: Build Docker Image
+    needs: 
+      - SAST
+      - SCA
+    runs-on: ubuntu-latest
+    steps:
+    
+      - name: Docker Auth
+        run: |
+          echo "Docker login"
+
+      - name: Docker Config
+        uses: docker/setup-buildx-action@v3
       
-      - name: Install Snyk
-        run: npm install -g snyk
+      - name: Construccion Imagen
+        run: | 
+          #docker build -t clagosu/ms-aumento-voto:latest .
+          echo "Docker build"
 
-      - name: Auth with Snyk
-        run: snyk auth ${{ secrets.snyk }}
-
-      - name: Snyk Open Source Scan (dependencies)
-        run: snyk test --file=package.json --severity-threshold=high || echo "⚠️ Snyk found issues, but pipeline continues"
-
-
-      - name: Snyk Monitor (upload results to dashboard)
-        run: snyk monitor --file=package.json  
-
-      
+  Container-Analysis:
+    name: Container Vulnerability Analysis
+    needs: Docker-build
+    runs-on: ubuntu-latest
+    steps:
+    
+      - name: Vulnerability Analysis
+        uses: aquasecurity/trivy-action@0.30.0
+        with:
+          image-ref: 'andres-dcic/demo-cicd-devsecops:latest'
+          format: 'table'
+          exit-code: '1'
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          severity: 'CRITICAL,HIGH'
+          
+  Docker-push:
+    needs: 
+      - Container-Analysis
+    runs-on: ubuntu-latest
+    steps:
+    
+      - name: Docker push
+        run: |
+          echo "Docker push"
