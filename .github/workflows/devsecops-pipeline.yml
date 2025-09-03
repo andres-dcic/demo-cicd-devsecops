@@ -1,3 +1,4 @@
+name: DevSecOps CI/CD Pipeline
 on:
   push:
     branches:
@@ -8,9 +9,7 @@ permissions:
   packages: read
   actions: read
   contents: read
-
-
-
+  
 jobs:
   
   SAST:
